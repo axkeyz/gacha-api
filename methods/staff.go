@@ -5,6 +5,7 @@ package methods
 import (
 	"strings"
 	"strconv"
+	"errors"
 
 	"github.com/axkeyz/gacha/config"
 )
@@ -70,6 +71,25 @@ func (filter *StaffAction) Index() ([]StaffAction, error) {
 	return actions, nil
 }
 
+func (action *StaffAction) Create() (error) {
+	if action.Name == "" {
+		return errors.New("action.Name cannot be empty")
+	}
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	query := `INSERT INTO staff_action (name) VALUES ($1)`
+
+	if _, err := db.Exec(query, action.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (filter *StaffAction) Read() (StaffAction, error) {
 	var action StaffAction
 
@@ -88,6 +108,30 @@ func (filter *StaffAction) Read() (StaffAction, error) {
 
 	// Return row
 	return action, err
+}
+
+// Update StaffAction updates the name of a staff action 
+// given its ID.
+func (action *StaffAction) Update() (error) {
+	// Check that the name is not empty
+	if action.Name == "" {
+		return errors.New("action.Name cannot be empty")
+	}
+
+	// Setup database & query
+	db := config.SetupDB()
+	defer db.Close()
+
+	if _, err := db.Exec( 
+		"UPDATE staff_action SET name = $1 WHERE id = $2", 
+		action.Name, action.ID,
+	); err == nil {
+		// Return nothing
+		return nil
+	} else {
+		// Return error
+		return err
+	}
 }
 
 func (filter *StaffAction) Filter(notExplicit bool) (string) {

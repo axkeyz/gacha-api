@@ -60,7 +60,9 @@ func main() {
 	t.GET("/admin/actions/can", staff.TestStaffPermission)
 	
 	a.GET("/actions", staff.IndexStaffActions)
+	a.POST("/actions/new", staff.CreateStaffAction)
 	a.GET("/actions/:id", staff.ReadStaffAction)
+	a.POST("/actions/:id", staff.UpdateStaffAction)
 
 	e.Logger.Fatal(e.Start(":1588"))
 }

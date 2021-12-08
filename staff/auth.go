@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/axkeyz/gacha/methods"
+	"github.com/axkeyz/gacha/internal/methods"
 )
 
 // AuthenticateStaff attempts to authenticate a user with the given

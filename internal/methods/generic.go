@@ -11,7 +11,7 @@ type Pagination struct {
     SortDir string `query:"dir" json:",omitempty"`
 }
 
-func (filters *Pagination) Query(table string) string {
+func (filters *Pagination) Query() string {
 	order := ""
 
 	if filters.SortBy != "" {
@@ -21,7 +21,7 @@ func (filters *Pagination) Query(table string) string {
 			// Change directon to descending
 			direction = "desc"
 		}
-		order = fmt.Sprintf(" ORDER BY %s.%s %s ", table, 
+		order = fmt.Sprintf(" ORDER BY %s %s ", 
 			filters.SortBy, direction)
 
 		// Pagination only possible if there is a sortby & direction

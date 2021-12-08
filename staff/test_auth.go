@@ -5,7 +5,7 @@ import (
 	
 	"github.com/labstack/echo/v4"
 
-	"github.com/axkeyz/gacha/methods"
+	"github.com/axkeyz/gacha/internal/methods"
 )
 
 func TestAuthenticateStaff(c echo.Context) error {
@@ -19,7 +19,7 @@ func TestStaffPermission(c echo.Context) error {
 	// Get the currently authenticated staff member
 	user := methods.CurrentAuthStaff(c.Get("user"))
 	
-	permission := user.Can("staff-update")
+	permission := user.CanStaff("staff-update")
 
 	return c.JSON(http.StatusOK, permission)
 }

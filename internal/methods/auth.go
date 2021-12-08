@@ -114,17 +114,17 @@ func CurrentAuthStaff(user interface{}) JWTToken {
 	return token
 }
 
-func (user *JWTToken) Permissions() ([]StaffAction ) {
-	var permissions []StaffAction
-	var permission StaffAction
+func (user *JWTToken) Permissions() ([]StaffPermission ) {
+	var permissions []StaffPermission
+	var permission StaffPermission
 
 	// Setup database
 	db := config.SetupDB()
 	defer db.Close()
 
 	// Setup query
-	q := `SELECT staff_action_id, staff_action.name
-	FROM staff_permission INNER JOIN staff_action ON 
+	q := `SELECT staff_permission.id, staff_action_id, 
+	staff_action.name FROM staff_permission INNER JOIN staff_action ON 
 	staff_permission.staff_action_id = staff_action.id where
 	staff_role_id = $1`
 
@@ -133,7 +133,9 @@ func (user *JWTToken) Permissions() ([]StaffAction ) {
 		// Map each row (of permission data) to pointers
 		for rows.Next() {
 			// Save data to pointer
-			err = rows.Scan(&permission.ID, &permission.Name)
+			err = rows.Scan( &permission.ID,
+				&permission.StaffAction.ID, &permission.StaffAction.Name,
+			)
 
 			if err != nil {
 				// Display error if rows.Scan causes an error
@@ -149,19 +151,24 @@ func (user *JWTToken) Permissions() ([]StaffAction ) {
 	return permissions
 }
 
-// JWTToken.Can("action-name") returns true if the user can
+// JWTToken.CanStaff("action-name") returns true if the user can
 // perform the identified action name.
-func (user *JWTToken) Can(doAction string) ( bool ) {
+func (user *JWTToken) CanStaff(doAction string) ( bool ) {
 	if ! user.Staff {
+		// User is not a staff member
 		return false
 	}
 
+	// Get user permissions
 	permissions := user.Permissions()
 
 	for _, i := range permissions {
-		if i.Name == doAction {
+		if i.StaffAction.Name == doAction {
+			// Action is among permissions, return true
 			return true
 		}
 	}
+
+	// Action not found, return false
 	return false
 }

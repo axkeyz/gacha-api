@@ -9,7 +9,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/joho/godotenv"
 
-	"github.com/axkeyz/gacha/methods"
+	"github.com/axkeyz/gacha/internal/methods"
+	// "github.com/axkeyz/gacha/internal/utils"
 	"github.com/axkeyz/gacha/staff"
 )
 
@@ -26,7 +27,20 @@ func main() {
 	a := e.Group("/admin")
 	t := e.Group("/test")
 
-	// Middlewares
+	// loggerConfig := middleware.DefaultLoggerConfig
+
+	// f, err := os.OpenFile("logs/api-"+utils.TodayIs()+".log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	// if err != nil {
+	// 	log.Fatal("Could not open log file, (%s)", err.Error())
+	// 	os.Exit(-1)
+	// }
+
+	// defer f.Close()
+
+	// loggerConfig.Output = f
+
+	// // Middlewares
+	// e.Use(middleware.LoggerWithConfig(loggerConfig))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(5)))
@@ -63,6 +77,12 @@ func main() {
 	a.POST("/actions/new", staff.CreateStaffAction)
 	a.GET("/actions/:id", staff.ReadStaffAction)
 	a.POST("/actions/:id", staff.UpdateStaffAction)
+
+	a.GET("/permissions", staff.IndexStaffPermissions)
+	a.POST("/permissions/new", staff.CreateStaffPermission)
+	a.GET("/permissions/:id", staff.ReadStaffPermission)
+	a.POST("/permissions/:id", staff.UpdateStaffPermission)
+	a.DELETE("/permissions/:id", staff.DeleteStaffPermission)
 
 	e.Logger.Fatal(e.Start(":1588"))
 }

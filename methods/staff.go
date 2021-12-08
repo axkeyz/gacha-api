@@ -36,6 +36,8 @@ type StaffAction struct {
 	Pagination
 }
 
+// StaffAction.Index returns all staff actions that fit the
+// criteria of *StaffAction.
 func (filter *StaffAction) Index() ([]StaffAction, error) {
 	var action StaffAction
 	var actions []StaffAction
@@ -71,6 +73,8 @@ func (filter *StaffAction) Index() ([]StaffAction, error) {
 	return actions, nil
 }
 
+// StaffAction.Create creates a single staff action given
+// a name.
 func (action *StaffAction) Create() (error) {
 	if action.Name == "" {
 		return errors.New("action.Name cannot be empty")
@@ -90,6 +94,8 @@ func (action *StaffAction) Create() (error) {
 	return nil
 }
 
+// StaffAction.Read returns the result of a single staff
+// action given its ID.
 func (filter *StaffAction) Read() (StaffAction, error) {
 	var action StaffAction
 
@@ -110,7 +116,7 @@ func (filter *StaffAction) Read() (StaffAction, error) {
 	return action, err
 }
 
-// Update StaffAction updates the name of a staff action 
+// StaffAction.Update updates the name of a staff action 
 // given its ID.
 func (action *StaffAction) Update() (error) {
 	// Check that the name is not empty
@@ -134,6 +140,10 @@ func (action *StaffAction) Update() (error) {
 	}
 }
 
+// StaffAction.Filter generates an SQL "WHERE" clause, given
+// the filter (*StaffAction). When using notExplicit = true,
+// this function generates a WHERE clause with LIKE = '%val%'
+// instead of direct =.
 func (filter *StaffAction) Filter(notExplicit bool) (string) {
 	var items []string
 	f1 := " = '"

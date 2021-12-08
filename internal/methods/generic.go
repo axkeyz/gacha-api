@@ -38,3 +38,10 @@ func (filters *Pagination) Query() string {
 
 	return order
 }
+
+type Error struct {
+	Code string `json:",omitempty"`
+	Message string `json:",omitempty"`
+	Details interface{} `json:",omitempty"`
+	Data interface{} `json:",omitempty"`
+}

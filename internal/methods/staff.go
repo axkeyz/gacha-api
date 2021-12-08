@@ -40,6 +40,51 @@ type StaffRole struct {
 	StaffAction []StaffAction `json:",omitempty"`
 }
 
+// StaffRole.Create creates a new StaffRole in the database 
+// given a unique name.
+func (role *StaffRole) Create() error {
+	if role.Name == "" {
+		return errors.New("Role name cannot be empty")
+	}
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	query := `INSERT INTO staff_role (name) VALUES ($1)`
+
+	if _, err := db.Exec(query, role.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// StaffRole.Update updates the name of a StaffRole given
+// its ID.
+func (role *StaffRole) Update() error {
+	// Check that the name is not empty
+	if role.Name == "" {
+		return errors.New("Role name cannot be empty")
+	}
+
+	// Setup database & query
+	db := config.SetupDB()
+	defer db.Close()
+
+	if _, err := db.Exec( 
+		"UPDATE staff_role SET name = $1 WHERE id = $2", 
+		role.Name, role.ID,
+	); err == nil {
+		// Return nothing
+		return nil
+	} else {
+		// Return error
+		return err
+	}
+}
+
 //========================= STAFF ACTION =========================//
 // StaffAction are the generic staff actions, that are used to name
 // shared staff role permissions.
@@ -217,6 +262,9 @@ type StaffPermission struct {
 	Pagination
 }
 
+// StaffPermission.Create creates a StaffPermission in the database
+// given that the permission *StaffPermission's StaffRoleID and
+// StaffActionID is not 0.
 func (permission *StaffPermission) Create() error {
 	if permission.StaffRoleID == 0 || permission.StaffActionID == 0 {
 		return errors.New("Role ID and Action ID cannot be empty")
@@ -238,7 +286,8 @@ func (permission *StaffPermission) Create() error {
 	return nil
 }
 
-// StaffPermission.Read returns a read-copy
+// StaffPermission.Read returns all StaffPermissions that fulfil
+// all parameters of the filter *StaffPermission.
 func (filter *StaffPermission) Read() ([]StaffPermission, error) {
 	var permissions []StaffPermission
 	var permission StaffPermission
@@ -280,6 +329,8 @@ func (filter *StaffPermission) Read() ([]StaffPermission, error) {
 	return permissions, nil
 }
 
+// StaffPermission.Update updates a StaffPermission in the database
+// given the permission.ID.
 func (permission *StaffPermission) Update() error {
 	// Check that the ids are not empty
 	if permission.ID == 0 || permission.StaffRoleID == 0 || 
@@ -304,6 +355,8 @@ func (permission *StaffPermission) Update() error {
 	}
 }
 
+// StaffPermission.Delete deletes a StaffPermission in the database
+// given the permission.ID.
 func (permission *StaffPermission) Delete() error {
 	// Check that the ids are not empty
 	if permission.ID == 0 {
@@ -325,6 +378,8 @@ func (permission *StaffPermission) Delete() error {
 	}
 }
 
+// StaffPermission.Filter is a helper function that generates a
+// filter string ("WHERE") given the filter parameters.
 func (filter *StaffPermission) Filter() string {
 	var items []string
 

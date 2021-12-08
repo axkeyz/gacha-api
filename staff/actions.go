@@ -25,7 +25,7 @@ func IndexStaffActions(c echo.Context) error {
 	if err != nil {
 		// Return the error
 		c.Logger().Error(err)
-		return echo.ErrBadRequest
+		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
 	// Return actions
@@ -36,22 +36,35 @@ func IndexStaffActions(c echo.Context) error {
 // given the name of the action @ POST /admin/actions/new
 func CreateStaffAction(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))
+	doAction := "staffaction-create"
+
+	// Setup log
+	staffLog := methods.StaffLog{
+		StaffID: user.ID,
+		StaffAction: methods.StaffAction{Name:doAction},
+		IPAddress: c.RealIP(),
+	}
 	
-	if user.CanStaff("staffaction-create") {
-		action := methods.StaffAction{
-			Name: c.FormValue("name"),
-		}
-
-		if err := action.Create(); err != nil {
-			c.Logger().Error(err)
-			return echo.ErrBadRequest
-		}
-
-		// Return action
-		return c.JSON(http.StatusOK, action)
-	} else {
+	if ! user.CanStaff(doAction) {
+		staffLog.Create(false, methods.Error{Message: "Unauthorised"})
 		return echo.ErrUnauthorized
 	}
+
+	action := methods.StaffAction{
+		Name: c.FormValue("name"),
+	}
+
+	if err := action.Create(); err != nil {
+		// Failed to create staff action
+		staffLog.Create(false, methods.Error{Details: err, Data: action})
+		c.Logger().Error(err)
+
+		return echo.NewHTTPError(http.StatusNotFound, err)
+	}
+
+	// Return action
+	staffLog.Create(true, methods.Error{Data: action})
+	return c.JSON(http.StatusOK, action)
 }
 
 // ReadStaffAction returns the details of a single StaffAction
@@ -73,7 +86,7 @@ func ReadStaffAction(c echo.Context) error {
 	if err != nil {
 		// Return the error
 		c.Logger().Error(err)
-		return echo.ErrBadRequest
+		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
 	// Return actions
@@ -85,25 +98,37 @@ func ReadStaffAction(c echo.Context) error {
 // @ POST /admin/actions/:id
 func UpdateStaffAction(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))
+	doAction := "staffaction-update"
+
+	// Setup log
+	staffLog := methods.StaffLog{
+		StaffID: user.ID,
+		StaffAction: methods.StaffAction{Name:doAction},
+		IPAddress: c.RealIP(),
+	}
 	
-	if user.CanStaff("staffaction-update") {
-		var action methods.StaffAction
-
-		// ID param is an integer
-		action.ID, _ = strconv.Atoi(c.Param("id"))
-		action.Name = c.FormValue("name")
-
-		// Get all applicable actions
-		err := action.Update()
-		if err != nil {
-			// Return the error
-			c.Logger().Error(err)
-			return echo.ErrBadRequest
-		}
-
-		// Return actions
-		return c.JSON(http.StatusOK, action)
-	} else {
+	if ! user.CanStaff(doAction) {
+		staffLog.Create(false, methods.Error{Message: "Unauthorised"})
 		return echo.ErrUnauthorized
 	}
+
+	var action methods.StaffAction
+
+	// ID param is an integer
+	action.ID, _ = strconv.Atoi(c.Param("id"))
+	action.Name = c.FormValue("name")
+
+	// Get all applicable actions
+	err := action.Update()
+	if err != nil {
+		// Return the error
+		staffLog.Create(false, methods.Error{Details: err, Data: action})
+		c.Logger().Error(err)
+
+		return echo.NewHTTPError(http.StatusNotFound, err)
+	}
+
+	// Return actions
+	staffLog.Create(true, methods.Error{Data: action})
+	return c.JSON(http.StatusOK, action)
 }

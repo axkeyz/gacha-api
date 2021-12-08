@@ -1,6 +1,8 @@
 package methods
 
 import (
+	"encoding/json"
+
 	"github.com/axkeyz/gacha/internal/utils"
 	"github.com/axkeyz/gacha/config"
 )
@@ -17,7 +19,11 @@ type StaffLog struct {
 	CreatedAt string `json:",omitempty"`
 }
 
-func (log *StaffLog) Create() {
+func (log *StaffLog) Create(success bool, notes interface{}) {
+	log.Success = success
+	notesJSON, _ := json.Marshal(notes)
+	log.Notes = string(notesJSON)
+
 	if utils.HasNoEmptyParams(
 		[]string{log.StaffAction.Name, log.Notes, log.IPAddress},
 	) {
@@ -31,7 +37,7 @@ func (log *StaffLog) Create() {
 		staff_action.name = $5;`
 
 		db.Exec(
-			q, log.Staff.ID, log.Success, log.Notes, log.IPAddress, log.StaffAction.Name,
+			q, log.StaffID, log.Success, log.Notes, log.IPAddress, log.StaffAction.Name,
 		); 
 	}
 }

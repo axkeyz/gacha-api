@@ -84,5 +84,8 @@ func main() {
 	a.POST("/permissions/:id", staff.UpdateStaffPermission)
 	a.DELETE("/permissions/:id", staff.DeleteStaffPermission)
 
+	a.POST("/roles/new", staff.CreateStaffRole)
+	a.POST("/roles/:id", staff.UpdateStaffRole)
+
 	e.Logger.Fatal(e.Start(":1588"))
 }

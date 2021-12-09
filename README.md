@@ -1,6 +1,6 @@
 # Gacha API
 
-This is the API for my future husbando game! But it's made to be a bit more general, so axkeyz/gacha-api it is.
+This is the API for my future game! But it's made to be a bit more general, so axkeyz/gacha-api it is.
 
 When's it going to come out? Haven't got a clue!
 
@@ -9,13 +9,13 @@ When's it going to come out? Haven't got a clue!
 - Game API endpoints: These will be connected to the game engine
     - Player login
     - Access summons
-    - Access husbandos
+    - Access heroes
     - Access resources
     - Guild management
     - Access summon/resource/spending history
 
 - Staff API endpoints: These will allow staff members to login to the game and add items directly into the game
-    - Create new environment + summonable husbandos
+    - Create new environment + summonable heroes
     - Create new events + manage rewards
     - Add associated art
     - Add associated sound

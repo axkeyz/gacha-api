@@ -2,6 +2,7 @@ package methods
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Pagination struct {
@@ -37,6 +38,49 @@ func (filters *Pagination) Query() string {
 	}
 
 	return order
+}
+
+func GenerateWhereQuery(s map[string]interface{}, explicit bool) string {
+	var params []string
+	var param, f1, f2 string
+	// var test bool
+
+	if explicit {
+		f1 = " = '"
+		f2 = "'"
+	} else {
+		f1 = " LIKE lower('%%"
+		f2 = "%%')"
+	}
+
+	for key, val := range s {
+		param = fmt.Sprintf("%v", val)
+
+		if IsNotPagination(key) && ! strings.Contains(param, "map") {
+			params = append(params,
+				fmt.Sprintf("lower(%s::text) %s%s%s", key, f1, param, f2))
+		}
+	}
+
+	if len(params) > 0 {
+		return " WHERE " + strings.Join(params, " AND ")
+	} else {
+		return ""
+	}
+}
+
+// IsNotPagination returns true if the given key is not a pagination
+// key.
+func IsNotPagination(key string) bool {
+	pagination := []string{"SortBy", "Asc", "Limit", "Offset"}
+
+	for _, p := range pagination {
+		if strings.Contains(key, p) {
+			return false
+		}
+	}
+
+	return true
 }
 
 type Error struct {

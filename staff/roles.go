@@ -105,7 +105,7 @@ func ReadStaffRole(c echo.Context) error {
 	return c.JSON(http.StatusOK, role)
 }
 
-// UpdateStaffRole reads a single staff role
+// UpdateStaffRole updates a single StaffRole
 // @ POST /admin/roles/:id
 func UpdateStaffRole(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))

@@ -72,6 +72,11 @@ func main() {
 	// Tests
 	t.GET("/admin/login", staff.TestAuthenticateStaff)
 	t.GET("/admin/actions/can", staff.TestStaffPermission)
+
+	a.GET("/staff", staff.IndexStaff)
+	a.POST("/staff/new", staff.CreateStaff)
+	a.GET("/staff/:id", staff.ReadStaff)
+	a.POST("/staff/:id", staff.UpdateStaff)
 	
 	a.GET("/actions", staff.IndexStaffActions)
 	a.POST("/actions/new", staff.CreateStaffAction)

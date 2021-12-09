@@ -8,19 +8,147 @@ import (
 	"errors"
 
 	"github.com/axkeyz/gacha-api/config"
+	"github.com/axkeyz/gacha-api/internal/utils"
 )
 
-// A staff struct stores the data of a staff members.
+//============================= STAFF ===========================//
+// Staff involves the staff members of the API.
+//
+// This is directly related to a staff member's identification &
+// permissions.
+//
+// This is directly mapped to the staff table. 
+//===============================================================//
+
 type Staff struct {
-	ID int `json:",omitempty"`
-	StaffRoleID int `json:",omitempty"`
+	ID int `query:"id" json:",omitempty"`
+	StaffRoleID int `query:"staff_role_id" json:",omitempty"`
 	StaffRole StaffRole `json:",omitempty"`
-	Username string `json:",omitempty"`
+	Username string `query:"username" json:",omitempty"`
 	Password string `json:",omitempty"`
-	Email string `json:",omitempty"`
-	IsActive bool `json:",omitempty"`
+	Email string `query:"email" json:",omitempty"`
+	IsActive bool `query:"is_active" json:",omitempty"`
 	JoinedAt string `json:",omitempty"`
 	LastLogin string `json:",omitempty"`
+	Pagination
+}
+
+// Staff.Create creates a new Staff in the database 
+// given parameters that fit required needs.
+func (staff *Staff) Create() error {
+	if ! utils.HasNoEmptyParams([]string{
+		staff.Username, staff.Password, staff.Email,
+	}) || staff.StaffRoleID == 0 {
+		return errors.New("Required params cannot be empty")
+	} else if ! utils.IsEmail(staff.Email) {
+		return errors.New("Enter valid email")
+	}
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	query := `INSERT INTO staff (staff_role_id, username, password, email)
+	VALUES ($1, $2, crypt($3, gen_salt('bf')), $4);`
+
+	if _, err := db.Exec(query, staff.StaffRoleID, staff.Username,
+		staff.Password, staff.Email); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Staff.Read returns all Staff members that fit the
+// given parameters in the filter *Staff.
+func (filter *Staff) Read(explicit bool) ([]Staff, error) {
+	var staffMembers []Staff
+	var staffMember Staff
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	main := `SELECT id, staff_role_id, username, email,
+	is_active, joined_at FROM staff`
+	where := filter.Filter(explicit)
+	sort := filter.Pagination.Query()
+
+	if rows, err := db.Query(main+where+sort); err != nil {
+		return staffMembers, err
+	} else {
+		for rows.Next() {
+			// Save data to pointer
+			err = rows.Scan(&staffMember.ID, &staffMember.StaffRoleID,
+			&staffMember.Username, &staffMember.Email,
+			&staffMember.IsActive, &staffMember.JoinedAt)
+
+			if err != nil {
+				// Display error if rows.Scan causes an error
+				return staffMembers, err
+			}
+
+			staffMembers = append(staffMembers, staffMember)
+		}
+	}
+	return staffMembers, nil
+}
+
+// Staff.Update updates the details of a Staff given
+// its ID.
+func (staff *Staff) Update(isSelf bool) error {
+	// Check that all required parameters are included
+	var isValid bool
+	var err error
+
+	if isSelf {
+		isValid = ! utils.HasNoEmptyParams([]string{
+			staff.Username, staff.Email, staff.Password,
+		})
+	} else {
+		isValid = ! utils.HasNoEmptyParams([]string{
+			staff.Username, staff.Email, 
+		}) || staff.StaffRoleID == 0
+	}
+
+	if isValid {
+		return errors.New("Required params cannot be empty")
+	} else if ! utils.IsEmail(staff.Email) {
+		return errors.New("Enter valid email")
+	}
+
+	// Setup database & query
+	db := config.SetupDB()
+	defer db.Close()
+
+	if isSelf {
+		_, err = db.Exec(`UPDATE staff SET username = $1, 
+		email = $2, password = crypt($3, gen_salt('bf') WHERE id
+		= $4`, staff.Username, staff.Email, staff.Password, staff.ID)
+	} else {
+		_, err = db.Exec( 
+			`UPDATE staff SET staff_role_id = $1, username = $2, email = $3, 
+			is_active = $4 WHERE id = $5`, staff.StaffRoleID, staff.Username,
+			staff.Email, staff.IsActive, staff.ID,
+		)
+	}
+
+	if err == nil {
+		// Return nothing
+		return nil
+	} else {
+		// Return error
+		return err
+	}
+}
+
+// Staff.Filter generates a WHERE query string given the filter
+// parameters.
+func (filter *Staff) Filter(explicit bool) string {
+	filterMap := utils.MapifyStruct(filter)
+	return GenerateWhereQuery(filterMap, explicit)	
 }
 
 //========================== STAFF ROLE =========================//

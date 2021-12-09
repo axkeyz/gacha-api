@@ -3,8 +3,8 @@ package methods
 import (
 	"encoding/json"
 
-	"github.com/axkeyz/gacha/internal/utils"
-	"github.com/axkeyz/gacha/config"
+	"github.com/axkeyz/gacha-api/internal/utils"
+	"github.com/axkeyz/gacha-api/config"
 )
 
 type StaffLog struct {

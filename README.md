@@ -1,6 +1,6 @@
 # Gacha API
 
-This is the API for my future husbando game! But it's made to be a bit more general, so axkeyz/gacha it is.
+This is the API for my future husbando game! But it's made to be a bit more general, so axkeyz/gacha-api it is.
 
 When's it going to come out? Haven't got a clue!
 

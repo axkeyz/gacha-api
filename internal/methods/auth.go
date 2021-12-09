@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/axkeyz/gacha/config"
+	"github.com/axkeyz/gacha-api/config"
 )
 
 // AUTH: An Auth struct stores the username & password used for

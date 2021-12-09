@@ -9,9 +9,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/joho/godotenv"
 
-	"github.com/axkeyz/gacha/internal/methods"
-	// "github.com/axkeyz/gacha/internal/utils"
-	"github.com/axkeyz/gacha/staff"
+	"github.com/axkeyz/gacha-api/internal/methods"
+	// "github.com/axkeyz/gacha-api/internal/utils"
+	"github.com/axkeyz/gacha-api/staff"
 )
 
 func main() {
@@ -84,7 +84,9 @@ func main() {
 	a.POST("/permissions/:id", staff.UpdateStaffPermission)
 	a.DELETE("/permissions/:id", staff.DeleteStaffPermission)
 
+	a.GET("/roles", staff.IndexStaffRoles)
 	a.POST("/roles/new", staff.CreateStaffRole)
+	a.GET("/roles/:id", staff.ReadStaffRole)
 	a.POST("/roles/:id", staff.UpdateStaffRole)
 
 	e.Logger.Fatal(e.Start(":1588"))

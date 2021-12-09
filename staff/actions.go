@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/axkeyz/gacha/internal/methods"
+	"github.com/axkeyz/gacha-api/internal/methods"
 )
 
 // IndexStaffActions returns a list of all staff actions available

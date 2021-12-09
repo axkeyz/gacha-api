@@ -1,4 +1,4 @@
-module github.com/axkeyz/gacha
+module github.com/axkeyz/gacha-api
 
 go 1.17
 

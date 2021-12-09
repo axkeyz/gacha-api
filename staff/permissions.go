@@ -6,9 +6,11 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/axkeyz/gacha/internal/methods"
+	"github.com/axkeyz/gacha-api/internal/methods"
 )
 
+// IndexStaffPermissions returns a list of staff permissions
+// @ GET /admin/permissions
 func IndexStaffPermissions(c echo.Context) error {
 	// Bind query parameters to model
 	filterStaffPermissions := new(methods.StaffPermission)
@@ -30,6 +32,8 @@ func IndexStaffPermissions(c echo.Context) error {
 	return c.JSON(http.StatusOK, permissions)
 }
 
+// CreateStaffPermission creates a single staff permission
+// @ POST /admin/permission/new
 func CreateStaffPermission(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))
 	doAction := "staffpermission-create"
@@ -71,6 +75,8 @@ func CreateStaffPermission(c echo.Context) error {
 	return c.JSON(http.StatusOK, permissions)
 }
 
+// ReadStaffPermission returns a single staff permission
+// @ GET /admin/permission/:id
 func ReadStaffPermission(c echo.Context) error {
 	// Bind query parameters to model
 	id, err := strconv.Atoi(c.Param("id"))
@@ -94,6 +100,8 @@ func ReadStaffPermission(c echo.Context) error {
 	return c.JSON(http.StatusOK, permissions[0])
 }
 
+// UpdateStaffPermission updates a single staff permission
+// @ POST /admin/permission/:id
 func UpdateStaffPermission(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))
 	doAction := "staffpermission-update"
@@ -137,6 +145,8 @@ func UpdateStaffPermission(c echo.Context) error {
 	return c.JSON(http.StatusOK, permissions)
 }
 
+// DeleteStaffPermission deletes a single staff permission
+// @ DELETE /admin/permission/:id
 func DeleteStaffPermission(c echo.Context) error {
 	user := methods.CurrentAuthStaff(c.Get("user"))
 	doAction := "staffpermission-delete"

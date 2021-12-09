@@ -5,7 +5,7 @@ import (
 	
 	"github.com/labstack/echo/v4"
 
-	"github.com/axkeyz/gacha/internal/methods"
+	"github.com/axkeyz/gacha-api/internal/methods"
 )
 
 func TestAuthenticateStaff(c echo.Context) error {

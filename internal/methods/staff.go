@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"errors"
 
-	"github.com/axkeyz/gacha/config"
+	"github.com/axkeyz/gacha-api/config"
 )
 
 // A staff struct stores the data of a staff members.
@@ -34,10 +34,11 @@ type Staff struct {
 //===============================================================//
 
 type StaffRole struct {
-	ID int `json:",omitempty"`
-	Name string `json:",omitempty"`
+	ID int `query:"id" json:",omitempty"`
+	Name string `query:"name" json:",omitempty"`
 	Staff []Staff `json:",omitempty"`
-	StaffAction []StaffAction `json:",omitempty"`
+	StaffPermission []StaffPermission `json:",omitempty"`
+	Pagination
 }
 
 // StaffRole.Create creates a new StaffRole in the database 
@@ -59,6 +60,39 @@ func (role *StaffRole) Create() error {
 	}
 
 	return nil
+}
+
+// StaffRole.Read returns a struct of all StaffRole(s) that
+// fit the given filter *StaffRole.
+func (filter *StaffRole) Read() ([]StaffRole, error) {
+	var roles []StaffRole
+	var role StaffRole
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	main := `SELECT id, name FROM staff_role`
+	where := filter.Filter()
+	sort := filter.Pagination.Query()
+
+	if rows, err := db.Query(main+where+sort); err != nil {
+		return roles, err
+	} else {
+		for rows.Next() {
+			// Save data to pointer
+			err = rows.Scan(&role.ID, &role.Name)
+
+			if err != nil {
+				// Display error if rows.Scan causes an error
+				return roles, err
+			}
+
+			roles = append(roles, role)
+		}
+	}
+	return roles, nil
 }
 
 // StaffRole.Update updates the name of a StaffRole given
@@ -83,6 +117,57 @@ func (role *StaffRole) Update() error {
 		// Return error
 		return err
 	}
+}
+
+func (role *StaffRole) Filter() string {
+	var items []string
+	
+	if role.Name != "" {
+		items = append(items, "lower(name) LIKE lower('%"+role.Name+"%')")
+	}
+
+	if role.ID != 0 {
+		items = append(items, "id = "+strconv.Itoa(role.ID))
+	}
+
+	if len(items) > 0 {
+		return " WHERE " + strings.Join(items, " AND ")
+	} else {
+		return ""
+	}
+}
+
+func (role *StaffRole) GetStaff() ([]Staff, error) {
+	var staffMembers []Staff
+	var staffMember Staff
+
+	// Setup database
+	db := config.SetupDB()
+	defer db.Close()
+
+	// Setup query
+	rows, err := db.Query(`SELECT id, username, email, is_active
+	FROM staff WHERE staff_role_id = $1`, role.ID)
+
+	if err != nil {
+		return staffMembers, err
+	} else {
+		// Map each row (of permission data) to pointers
+		for rows.Next() {
+			// Save data to pointer
+			err = rows.Scan(&staffMember.ID, &staffMember.Username,
+			&staffMember.Email, &staffMember.IsActive)
+
+			if err != nil {
+				// Display error if rows.Scan causes an error
+				return staffMembers, err
+			}
+
+			// append data to staffMembers
+			staffMembers = append(staffMembers, staffMember)
+		}
+	}
+	return staffMembers, nil
 }
 
 //========================= STAFF ACTION =========================//
@@ -118,8 +203,9 @@ func (filter *StaffAction) Index() ([]StaffAction, error) {
 	where := filter.Filter(true)
 	sort := filter.Pagination.Query()
 
-	if rows, err := db.Query(main+where+sort); err == nil {
-		
+	if rows, err := db.Query(main+where+sort); err != nil {
+		return actions, err
+	} else {
 		// Map each row (of permission data) to pointers
 		for rows.Next() {
 			// Save data to pointer

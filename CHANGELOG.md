@@ -1,6 +1,6 @@
 # Unreleased
 
-## 2021-12-08
+## 2021-12-08 - Present
 
 Added
 - More documentation (readme, changelog, licence)
@@ -10,3 +10,9 @@ Added
 
 Changed
 - Project structure (new internal folder, containing utils & methods)
+
+Game Name Considerations
+The SAR Probability
+SAR Tracer
+The Tracer
+Triangular Chance

@@ -225,6 +225,8 @@ CREATE TABLE "hero_action_allowed" (
 CREATE TABLE "currency" (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
+    url TEXT NOT NULL UNIQUE,
+    description TEXT NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
